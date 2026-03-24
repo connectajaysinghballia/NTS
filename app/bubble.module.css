@@ -1,0 +1,83 @@
+.hoverText {
+  transition: 0.35s font-weight, 0.35s color, 0.35s transform;
+  display: inline-block;
+  cursor: default;
+}
+
+.hoverText:hover {
+  font-weight: 900;
+  color: #00b4d8;
+  transform: translateY(-2px);
+}
+
+/* For the gradient section, we might want to keep the transparency or just let the color override be the effect */
+/* For the gradient section, we might want to keep the transparency or just let the color override be the effect */
+.hoverText:hover {
+  /* This will override text-transparent if applied to the parent's characters */
+  color: #00b4d8;
+}
+
+.cta {
+  position: relative;
+  margin: 0;
+  padding: 12px 18px;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  border-radius: 50px;
+  background: #00b4d8;
+  width: 45px;
+  height: 100%;
+  transition: all 0.3s ease;
+  z-index: 0;
+  box-shadow: 0 10px 40px -5px rgba(0,180,216,0.5);
+}
+
+.cta span {
+  position: relative;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  z-index: 1;
+}
+
+.cta svg {
+  position: relative;
+  top: 0;
+  margin-left: 10px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke: #ffffff;
+  stroke-width: 2;
+  transform: translateX(-5px);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.cta:hover::before {
+  width: 100%;
+  background: #00b4d8;
+}
+
+.cta:hover svg {
+  transform: translateX(0);
+}
+
+.cta:active {
+  transform: scale(0.95);
+}
