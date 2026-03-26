@@ -2,19 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, User, ArrowRight, Loader2, LayoutDashboard, Clock, LogOut, Cpu, Command, MessageSquare, Briefcase, FileText } from 'lucide-react';
+import { Shield, Lock, User, ArrowRight, Loader2, LayoutDashboard, Clock, LogOut, Cpu, Command, MessageSquare, Briefcase, FileText, Target, Users, Receipt, Award } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import InquiriesTable from '@/components/admin/InquiriesTable';
 import CareersTable from '@/components/admin/CareersTable';
 import BlogForm from '@/components/admin/BlogForm';
 import BlogsTable from '@/components/admin/BlogsTable';
+import OpportunitiesTable from '@/components/admin/OpportunitiesTable';
+import EmployeesTable from '@/components/admin/EmployeesTable';
+import SalarySlipGenerator from '@/components/admin/SalarySlipGenerator';
+import ExperienceLetter from '@/components/admin/ExperienceLetter';
+import AdminCharts from '@/components/admin/AdminCharts';
 
 export default function UnifiedAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [counts, setCounts] = useState({ inquiries: 0, careers: 0, blogs: 0 });
+  const [counts, setCounts] = useState({ inquiries: 0, careers: 0, blogs: 0, opportunities: 0, employees: 0, slips: 0 });
+  const [financials, setFinancials] = useState({ totalSalaryPaid: 0, totalProjectValuation: 0, totalProjectsDone: 0 });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [slips, setSlips] = useState<any[]>([]);
   const [refreshBlogs, setRefreshBlogs] = useState(0);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,23 +38,47 @@ export default function UnifiedAdminPage() {
       Promise.all([
         fetch('/api/admin/inquiries').then(res => res.json()),
         fetch('/api/admin/careers').then(res => res.json()),
-        fetch('/api/admin/blogs').then(res => res.json())
-      ]).then(([inqData, carData, blogData]) => {
+        fetch('/api/admin/blogs').then(res => res.json()),
+        fetch('/api/admin/opportunities').then(res => res.json()),
+        fetch('/api/admin/employees').then(res => res.json()),
+        fetch('/api/admin/salary').then(res => res.json())
+      ]).then(([inqData, carData, blogData, oppData, empData, slipData]) => {
         const inquiries = inqData.success ? inqData.data : [];
         const careers = carData.success ? carData.data : [];
         const blogs = blogData.success ? blogData.data : [];
+        const opportunities = oppData.success ? oppData.data : [];
+        const employees = empData.success ? empData.data : [];
+        const slips = slipData.success ? slipData.data : [];
+
+        setOpportunities(opportunities);
+        setSlips(slips);
 
         setCounts({
           inquiries: inquiries.length,
           careers: careers.length,
-          blogs: blogs.length
+          blogs: blogs.length,
+          opportunities: opportunities.length,
+          employees: employees.length,
+          slips: slips.length
         });
+
+        // Compute financial summary
+        const totalSalaryPaid = slips.reduce((sum: number, s: any) => sum + (s.netSalary || 0), 0);
+        const totalProjectValuation = opportunities.reduce((sum: number, o: any) => {
+          const raw = String(o.projectValuation || '0').replace(/[^0-9.]/g, '');
+          return sum + (parseFloat(raw) || 0);
+        }, 0);
+        const totalProjectsDone = opportunities.filter((o: any) => o.status === 'Closed-Won').length;
+        setFinancials({ totalSalaryPaid, totalProjectValuation, totalProjectsDone });
 
         // Combine and sort recent activity
         const combined = [
           ...inquiries.slice(0, 3).map((v: any) => ({ ...v, type: 'inquiry', label: 'New Inquiry' })),
           ...careers.slice(0, 3).map((v: any) => ({ ...v, type: 'career', label: 'New Application' })),
-          ...blogs.slice(0, 3).map((v: any) => ({ ...v, type: 'blog', label: 'New Article' }))
+          ...blogs.slice(0, 3).map((v: any) => ({ ...v, type: 'blog', label: 'New Article' })),
+          ...opportunities.slice(0, 3).map((v: any) => ({ ...v, type: 'opportunity', label: 'New Deal' })),
+          ...employees.slice(0, 3).map((v: any) => ({ ...v, type: 'employee', label: 'New Staff Registration' })),
+          ...slips.slice(0, 3).map((v: any) => ({ ...v, type: 'slip', label: 'New Salary Slip Generated' }))
         ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         setRecentActivity(combined.slice(0, 5));
@@ -298,6 +330,46 @@ export default function UnifiedAdminPage() {
                   <FileText className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'blogs' ? 'text-[#00b4d8]' : ''}`} />
                   Blogs
                 </button>
+                <button 
+                  onClick={() => setActiveTab('opportunities')}
+                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'opportunities' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
+                >
+                  {activeTab === 'opportunities' && (
+                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
+                  )}
+                  <Target className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'opportunities' ? 'text-[#00b4d8]' : ''}`} />
+                  Opportunities
+                </button>
+                <button 
+                  onClick={() => setActiveTab('employees')}
+                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'employees' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
+                >
+                  {activeTab === 'employees' && (
+                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
+                  )}
+                  <Users className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'employees' ? 'text-[#00b4d8]' : ''}`} />
+                  Employees
+                </button>
+                <button 
+                  onClick={() => setActiveTab('slips')}
+                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'slips' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
+                >
+                  {activeTab === 'slips' && (
+                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
+                  )}
+                  <Receipt className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'slips' ? 'text-[#00b4d8]' : ''}`} />
+                  Salary Slips
+                </button>
+                <button 
+                  onClick={() => setActiveTab('experience')}
+                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'experience' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
+                >
+                  {activeTab === 'experience' && (
+                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
+                  )}
+                  <Award className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'experience' ? 'text-[#00b4d8]' : ''}`} />
+                  Experience Letter
+                </button>
               </nav>
 
               <div className="p-4 relative z-10">
@@ -337,9 +409,10 @@ export default function UnifiedAdminPage() {
                     {activeTab === 'inquiries' && 'Contact Inquiries'}
                     {activeTab === 'careers' && 'Job Applications'}
                     {activeTab === 'blogs' && 'Blog Management'}
+                    {activeTab === 'opportunities' && 'Opportunities Pipeline'}
                   </h2>
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] inline-block"></span>
                     System Operational 
                   </p>
                 </div>
@@ -361,6 +434,41 @@ export default function UnifiedAdminPage() {
                     className="max-w-5xl mx-auto flex flex-col pt-8 pb-12"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                      {/* ── Financial Summary Banner ── */}
+                      <div className="col-span-1 md:col-span-2 relative bg-[#0a1128] rounded-[2rem] overflow-hidden p-8 shadow-2xl shadow-slate-900/20">
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAtNnY2aDZ2LTZoLTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
+                        <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-full blur-[60px]"></div>
+                        <div className="relative z-10">
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-6">Business Intelligence Overview</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            {/* Total Salary Paid */}
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Salary Paid</p>
+                              <p className="text-2xl font-black text-white">
+                                ₹{financials.totalSalaryPaid.toLocaleString('en-IN')}
+                              </p>
+                              <p className="text-[10px] text-slate-500 mt-1">{counts.slips} slip{counts.slips !== 1 ? 's' : ''} generated</p>
+                            </div>
+                            {/* Total Project Valuation */}
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Project Valuation</p>
+                              <p className="text-2xl font-black text-cyan-400">
+                                ₹{financials.totalProjectValuation.toLocaleString('en-IN')}
+                              </p>
+                              <p className="text-[10px] text-slate-500 mt-1">{counts.opportunities} deal{counts.opportunities !== 1 ? 's' : ''} in pipeline</p>
+                            </div>
+                            {/* Projects Done */}
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Projects Completed</p>
+                              <p className="text-2xl font-black text-emerald-400">
+                                {financials.totalProjectsDone}
+                              </p>
+                              <p className="text-[10px] text-slate-500 mt-1">Closed-Won opportunities</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <button 
                         onClick={() => setActiveTab('inquiries')}
                         className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-900/10"
@@ -402,15 +510,36 @@ export default function UnifiedAdminPage() {
                         </div>
                       </button>
 
+                      {/* Opportunities Card */}
+                      <button 
+                        onClick={() => setActiveTab('opportunities')}
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-amber-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-amber-900/10 col-span-1 md:col-span-2"
+                      >
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
+                        
+                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Sales Pipeline</h3>
+                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[400px]">Track and manage prospective clients, values, and deal statuses seamlessly aligned with incoming leads.</p>
+                        
+                        <div className="flex items-center gap-3 mb-6 relative z-10">
+                          <div className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black italic">
+                            {counts.opportunities} Deals
+                          </div>
+                        </div>
+                        
+                        <div className="inline-flex items-center gap-2 text-amber-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
+                          Manage Deals <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+
                       {/* Blogs Card */}
                       <button 
                         onClick={() => setActiveTab('blogs')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-cyan-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/10 col-span-1 md:col-span-2"
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-cyan-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/10"
                       >
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
                         
                         <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Blog Management</h3>
-                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[400px]">Publish news, technology updates, and security insights to the blog.</p>
+                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Publish news and insights.</p>
                         
                         <div className="flex items-center gap-3 mb-6 relative z-10">
                           <div className="px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-[10px] font-black italic">
@@ -422,7 +551,78 @@ export default function UnifiedAdminPage() {
                           Open <ArrowRight className="w-3.5 h-3.5" />
                         </div>
                       </button>
+
+                      {/* Employees Card */}
+                      <button 
+                        onClick={() => setActiveTab('employees')}
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-indigo-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-900/10"
+                      >
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
+                        
+                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Personnel Directory</h3>
+                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Manage corporate staff records.</p>
+                        
+                        <div className="flex items-center gap-3 mb-6 relative z-10">
+                          <div className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black italic">
+                            {counts.employees} Registered
+                          </div>
+                        </div>
+                        
+                        <div className="inline-flex items-center gap-2 text-indigo-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
+                          Open <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+
+                      {/* Salary Slips Card */}
+                      <button 
+                        onClick={() => setActiveTab('slips')}
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-teal-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-900/10 col-span-1 md:col-span-2"
+                      >
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
+                        
+                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Payroll & Slips</h3>
+                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[400px]">Generate legally verifiable monthly salary PDFs and automatically track the firm's payroll history in the database.</p>
+                        
+                        <div className="flex items-center gap-3 mb-6 relative z-10">
+                          <div className="px-3 py-1.5 bg-teal-50 text-teal-600 rounded-full text-[10px] font-black italic">
+                            {counts.slips} Slips Generated
+                          </div>
+                        </div>
+                        
+                        <div className="inline-flex items-center gap-2 text-teal-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
+                          Manage Payroll <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+
+                      {/* Experience Letter Card */}
+                      <button 
+                        onClick={() => setActiveTab('experience')}
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-violet-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-900/10"
+                      >
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-violet-50 to-purple-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
+                        
+                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Credentials & Letters</h3>
+                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Issue formal experience certificates.</p>
+                        
+                        <div className="flex items-center gap-3 mb-6 relative z-10">
+                          <div className="px-3 py-1.5 bg-violet-50 text-violet-600 rounded-full text-[10px] font-black italic">
+                            Official Document
+                          </div>
+                        </div>
+                        
+                        <div className="inline-flex items-center gap-2 text-violet-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
+                          Generate <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
                     </div>
+
+                    {/* Analytics Section */}
+                    <AdminCharts 
+                      opportunities={opportunities} 
+                      slips={slips} 
+                      counts={counts} 
+                    />
+
 
                     {/* Recent Activity Section */}
                     <div className="mt-16 space-y-6">
@@ -440,10 +640,16 @@ export default function UnifiedAdminPage() {
                               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${
                                 activity.type === 'inquiry' ? 'bg-blue-50 border-blue-100 text-[#00b4d8]' :
                                 activity.type === 'career' ? 'bg-emerald-50 border-emerald-100 text-emerald-500' :
+                                activity.type === 'opportunity' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                                activity.type === 'employee' ? 'bg-indigo-50 border-indigo-100 text-indigo-600' :
+                                activity.type === 'slip' ? 'bg-teal-50 border-teal-100 text-teal-600' :
                                 'bg-cyan-50 border-cyan-100 text-cyan-600'
                               }`}>
                                 {activity.type === 'inquiry' ? <MessageSquare className="w-5 h-5" /> :
                                  activity.type === 'career' ? <Briefcase className="w-5 h-5" /> :
+                                 activity.type === 'opportunity' ? <Target className="w-5 h-5" /> :
+                                 activity.type === 'employee' ? <Users className="w-5 h-5" /> :
+                                 activity.type === 'slip' ? <Receipt className="w-5 h-5" /> :
                                  <FileText className="w-5 h-5" />}
                               </div>
                               <div>
@@ -451,7 +657,7 @@ export default function UnifiedAdminPage() {
                                   {activity.label}
                                 </p>
                                 <p className="font-bold text-slate-900 truncate max-w-sm">
-                                  {activity.name || activity.title}
+                                  {activity.name || activity.title || activity.projectName || activity.employeeName}
                                 </p>
                               </div>
                             </div>
@@ -480,6 +686,10 @@ export default function UnifiedAdminPage() {
                 
                 {activeTab === 'inquiries' && <InquiriesTable />}
                 {activeTab === 'careers' && <CareersTable />}
+                {activeTab === 'opportunities' && <OpportunitiesTable />}
+                {activeTab === 'employees' && <EmployeesTable />}
+                {activeTab === 'slips' && <SalarySlipGenerator />}
+                {activeTab === 'experience' && <ExperienceLetter />}
                 {activeTab === 'blogs' && (
                   <div className="space-y-12 pb-20 pt-8">
                     <BlogForm onSuccess={() => setRefreshBlogs(prev => prev + 1)} />
