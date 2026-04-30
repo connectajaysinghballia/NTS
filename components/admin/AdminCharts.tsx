@@ -79,7 +79,7 @@ export default function AdminCharts({ opportunities, slips, counts }: AdminChart
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="lg:col-span-8 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100"
+        className="lg:col-span-8 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-[#0a1128]/20"
       >
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -140,11 +140,11 @@ export default function AdminCharts({ opportunities, slips, counts }: AdminChart
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="lg:col-span-4 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 flex flex-col"
+        className="lg:col-span-4 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-[#0a1128]/20 flex flex-col"
       >
         <div className="mb-8">
           <h4 className="text-lg font-black text-[#0a1128] tracking-tight flex items-center gap-2">
-            <PieChart as="PieIcon" className="w-5 h-5 text-indigo-500" />
+            <PieIcon className="w-5 h-5 text-indigo-500" />
             Module Weights
           </h4>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Data Asset Composition</p>
@@ -160,10 +160,11 @@ export default function AdminCharts({ opportunities, slips, counts }: AdminChart
                 innerRadius={60}
                 outerRadius={80}
                 paddingAngle={8}
+                cornerRadius={4}
                 dataKey="value"
               >
                 {activityData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={4} />
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip 
@@ -173,7 +174,7 @@ export default function AdminCharts({ opportunities, slips, counts }: AdminChart
           </ResponsiveContainer>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
-              <p className="text-2xl font-black text-[#0a1128]">{Object.values(counts).reduce((a:any, b:any) => a + b, 0)}</p>
+              <p className="text-2xl font-black text-[#0a1128]">{(Object.values(counts) as number[]).reduce((a: number, b: number) => a + b, 0)}</p>
               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Total Items</p>
             </div>
           </div>

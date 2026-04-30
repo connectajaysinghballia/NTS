@@ -141,9 +141,9 @@ export default function EmployeesTable() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden relative"
+      className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-[#0a1128]/20 overflow-hidden relative"
     >
-      <div className="px-6 py-4 border-b border-slate-100/80 bg-white flex items-center justify-between flex-wrap gap-4">
+      <div className="px-6 py-4 border-b border-[#0a1128]/10 bg-white flex items-center justify-between flex-wrap gap-4">
         <div>
           <h3 className="text-lg font-black text-[#0a1128] tracking-tight flex items-center gap-2">
             <Users className="w-5 h-5 text-indigo-500" />

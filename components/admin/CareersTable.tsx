@@ -25,9 +25,9 @@ export default function CareersTable() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden"
+      className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-[#0a1128]/20 overflow-hidden"
     >
-      <div className="px-6 py-4 border-b border-slate-100/80 bg-white flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-[#0a1128]/10 bg-white flex items-center justify-between">
         <div>
           <h3 className="text-lg font-black text-[#0a1128] tracking-tight">Applications</h3>
           <p className="text-[10px] text-slate-500 mt-0.5">Review candidates from the careers page.</p>

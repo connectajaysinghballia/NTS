@@ -391,13 +391,10 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-full py-8 lg:py-10 bg-black border-t border-white/5 flex flex-wrap justify-center items-center divide-x divide-white/10 hover:opacity-100 transition-all duration-700">
            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="px-6 md:px-10 lg:px-8 xl:px-16 2xl:px-20 flex items-center justify-center transition-all group relative cursor-pointer">
-                {/* Blue glow overlay */}
-                <div className="absolute inset-0 bg-[#00b4d8]/0 group-hover:bg-[#00b4d8]/15 rounded-xl transition-all duration-400 blur-sm"></div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,216,0.2) 0%, transparent 70%)' }}></div>
                 <img
-                  src="/herologo.png"
+                  src="/logo1.png"
                   alt="Partner Logo"
-                  className="h-12 md:h-16 lg:h-16 xl:h-20 2xl:h-24 object-contain brightness-[0.6] group-hover:brightness-100 group-hover:scale-110 transition-all duration-400 relative z-10"
+                  className="h-12 md:h-16 lg:h-16 xl:h-20 2xl:h-24 object-contain brightness-100 transition-all duration-400 relative z-10"
                 />
               </div>
            ))}

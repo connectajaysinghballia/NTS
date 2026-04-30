@@ -181,9 +181,9 @@ export default function SalarySlipGenerator() {
   if (loading) return <div className="flex justify-center items-center h-64"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>;
 
   return (
-    <div className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden relative min-h-[70vh]">
+    <div className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-[#0a1128]/20 overflow-hidden relative min-h-[70vh]">
       {/* Header & Tabs */}
-      <div className="px-8 py-6 border-b border-slate-100/80 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="px-8 py-6 border-b border-[#0a1128]/10 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h3 className="text-xl font-black text-[#0a1128] tracking-tight flex items-center gap-3">
             <Calculator className="w-6 h-6 text-cyan-500" />
@@ -361,7 +361,9 @@ export default function SalarySlipGenerator() {
                       <div className="flex items-center justify-end gap-2">
                         {/* Basic mailto schema for easy desktop client email */}
                         <a 
-                          href={`mailto:?subject=Salary Slip - ${slip.month} ${slip.year}&body=Please find the attached salary slip details for the period.`}
+                          href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(`Salary Slip - ${slip.month} ${slip.year}`)}&body=${encodeURIComponent("Please find the salary slip details for the period.")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors"
                           title="Compose Email"
                         >

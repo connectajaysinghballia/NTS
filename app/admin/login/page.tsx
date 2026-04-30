@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, User, ArrowRight, Loader2, LayoutDashboard, Clock, LogOut, Cpu, Command, MessageSquare, Briefcase, FileText, Target, Users, Receipt, Award } from 'lucide-react';
+import { Lock, User, ArrowRight, Loader2, LayoutDashboard, Clock, LogOut, Shield, Cpu, Command, MessageSquare, Briefcase, FileText, Target, Users, Receipt, Award, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import InquiriesTable from '@/components/admin/InquiriesTable';
 import CareersTable from '@/components/admin/CareersTable';
 import BlogForm from '@/components/admin/BlogForm';
@@ -12,11 +13,13 @@ import OpportunitiesTable from '@/components/admin/OpportunitiesTable';
 import EmployeesTable from '@/components/admin/EmployeesTable';
 import SalarySlipGenerator from '@/components/admin/SalarySlipGenerator';
 import ExperienceLetter from '@/components/admin/ExperienceLetter';
+import InternshipOfferLetter from '@/components/admin/InternshipOfferLetter';
 import AdminCharts from '@/components/admin/AdminCharts';
 
 export default function UnifiedAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [counts, setCounts] = useState({ inquiries: 0, careers: 0, blogs: 0, opportunities: 0, employees: 0, slips: 0 });
   const [financials, setFinancials] = useState({ totalSalaryPaid: 0, totalProjectValuation: 0, totalProjectsDone: 0 });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -29,7 +32,6 @@ export default function UnifiedAdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Strictly enforcing manual login: Clearing session on page load
     localStorage.removeItem('isAdminAuthenticated');
   }, []);
 
@@ -62,7 +64,6 @@ export default function UnifiedAdminPage() {
           slips: slips.length
         });
 
-        // Compute financial summary
         const totalSalaryPaid = slips.reduce((sum: number, s: any) => sum + (s.netSalary || 0), 0);
         const totalProjectValuation = opportunities.reduce((sum: number, o: any) => {
           const raw = String(o.projectValuation || '0').replace(/[^0-9.]/g, '');
@@ -71,7 +72,6 @@ export default function UnifiedAdminPage() {
         const totalProjectsDone = opportunities.filter((o: any) => o.status === 'Closed-Won').length;
         setFinancials({ totalSalaryPaid, totalProjectValuation, totalProjectsDone });
 
-        // Combine and sort recent activity
         const combined = [
           ...inquiries.slice(0, 3).map((v: any) => ({ ...v, type: 'inquiry', label: 'New Inquiry' })),
           ...careers.slice(0, 3).map((v: any) => ({ ...v, type: 'career', label: 'New Application' })),
@@ -119,6 +119,18 @@ export default function UnifiedAdminPage() {
     setFormData({ username: '', password: '' });
   };
 
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'inquiries', label: 'Inquiries', icon: MessageSquare },
+    { id: 'careers', label: 'Applications', icon: Briefcase },
+    { id: 'blogs', label: 'Blogs', icon: FileText },
+    { id: 'opportunities', label: 'Opportunities', icon: Target },
+    { id: 'employees', label: 'Employees', icon: Users },
+    { id: 'slips', label: 'Salary Slips', icon: Receipt },
+    { id: 'experience', label: 'Experience Letter', icon: Award },
+    { id: 'internship', label: 'Offer Letter', icon: Briefcase },
+  ];
+
   return (
     <div className="min-h-screen bg-[#fafcff] font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
       <AnimatePresence mode="wait">
@@ -128,78 +140,31 @@ export default function UnifiedAdminPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 0.98, filter: "blur(10px)" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative"
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="min-h-screen bg-[#020617] flex items-center justify-center p-6"
           >
-            {/* 🌌 Animated Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[160px] animate-pulse" />
-              <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-600/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
-              
-              {/* Floating Decorative Particles */}
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ 
-                    y: [0, -20, 0],
-                    opacity: [0.1, 0.3, 0.1],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 4 + i, 
-                    repeat: Infinity, 
-                    ease: "easeInOut",
-                    delay: i * 0.5 
-                  }}
-                  className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                  style={{ 
-                    top: `${15 + i * 15}%`, 
-                    left: `${10 + (i * 17) % 80}%` 
-                  }}
-                />
-              ))}
-              
-              <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:32px_32px]" />
-            </div>
+            <div className="w-full max-w-sm relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#00b4d8]/5 rounded-full blur-[100px] opacity-50" />
 
-            <div className="w-full max-w-md relative z-10">
-              <div className="text-center mb-12">
-                <motion.div 
-                   animate={{ 
-                     boxShadow: ["0 0 20px rgba(59, 130, 246, 0.2)", "0 0 40px rgba(59, 130, 246, 0.4)", "0 0 20px rgba(59, 130, 246, 0.2)"] 
-                   }}
-                   transition={{ duration: 3, repeat: Infinity }}
-                   className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-gradient-to-br from-[#00b4d8] to-[#0077b6] shadow-2xl mb-8 group relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <Shield className="w-12 h-12 text-white group-hover:scale-110 transition-transform duration-500 relative z-10" />
-                </motion.div>
-                <motion.h1 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-5xl font-black text-white tracking-tight mb-3 uppercase italic"
-                >
+              <div className="text-center mb-10 relative z-10">
+                <h1 className="text-3xl font-black text-white tracking-tighter uppercase">
                   Admin <span className="text-[#00b4d8]">Hub</span>
-                </motion.h1>
-                <p className="text-slate-500 font-medium tracking-widest uppercase text-xs">NOVALYTIX SECURITY GATEWAY</p>
+                </h1>
+                <p className="text-[9px] font-black tracking-[0.3em] text-slate-500 uppercase mt-2">NOVALYTIX SECURITY GATEWAY</p>
               </div>
 
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-white/[0.03] backdrop-blur-3xl p-10 rounded-[3rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden group"
+                transition={{ delay: 0.2 }}
+                className="bg-white/[0.02] backdrop-blur-3xl p-8 rounded-[2rem] border border-white/10 shadow-2xl relative z-10"
               >
-                {/* Subtle Glass Noise Overlay */}
-                <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-                
-                <form onSubmit={handleLogin} className="space-y-8 relative z-10">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00b4d8] ml-2">Access Identity</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-slate-500 transition-colors group-focus-within:text-[#00b4d8]" />
+                <form onSubmit={handleLogin} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00b4d8] ml-1">Access Identity</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <User className="h-4 w-4 text-slate-500 group-focus-within:text-[#00b4d8] transition-colors" />
                       </div>
                       <input
                         type="text"
@@ -207,16 +172,16 @@ export default function UnifiedAdminPage() {
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         placeholder="NTS Admin ID"
-                        className="block w-full pl-16 pr-8 py-6 bg-white/[0.03] border border-white/10 rounded-[1.5rem] text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-[#00b4d8]/10 focus:border-[#00b4d8]/50 focus:bg-white/[0.08] transition-all duration-300 font-bold"
+                        className="block w-full pl-12 pr-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-4 focus:ring-[#00b4d8]/10 focus:border-[#00b4d8]/50 transition-all font-bold text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00b4d8] ml-2">Security Key</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-slate-500 transition-colors group-focus-within:text-[#00b4d8]" />
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00b4d8] ml-1">Security Key</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <Lock className="h-4 w-4 text-slate-500 group-focus-within:text-[#00b4d8] transition-colors" />
                       </div>
                       <input
                         type="password"
@@ -224,45 +189,41 @@ export default function UnifiedAdminPage() {
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         placeholder="••••••••••••"
-                        className="block w-full pl-16 pr-8 py-6 bg-white/[0.03] border border-white/10 rounded-[1.5rem] text-white placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-[#00b4d8]/10 focus:border-[#00b4d8]/50 focus:bg-white/[0.08] transition-all duration-300 font-bold"
+                        className="block w-full pl-12 pr-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-4 focus:ring-[#00b4d8]/10 focus:border-[#00b4d8]/50 transition-all font-bold text-sm"
                       />
                     </div>
                   </div>
 
                   {error && (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl flex items-center gap-3 text-red-500"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-[10px] font-bold text-rose-500 text-center uppercase tracking-wider"
                     >
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      <span className="text-xs font-black uppercase tracking-tight">{error}</span>
+                      {error}
                     </motion.div>
                   )}
 
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`w-full py-6 text-white font-black uppercase tracking-[0.25em] rounded-[1.5rem] shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-[0.97] relative overflow-hidden group ${isLoading ? 'bg-slate-800 cursor-not-allowed' : 'bg-[#00b4d8] hover:bg-[#0096c7]'}`}
+                    className={`w-full py-4 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 ${isLoading ? 'bg-slate-800' : 'bg-[#00b4d8] hover:bg-[#0096c7] shadow-[#00b4d8]/20'}`}
                   >
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                     {isLoading ? (
-                      <Loader2 className="w-7 h-7 animate-spin relative z-10" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <>
-                        <span className="relative z-10">Initiate Access</span>
-                        <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform relative z-10" />
+                        Initiate Access
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
                 </form>
               </motion.div>
               
-              <div className="mt-12 flex items-center justify-center gap-8 opacity-40">
-                <Cpu className="w-5 h-5 text-slate-500 hover:text-blue-400 transition-colors animate-float" />
-                <Command className="w-5 h-5 text-slate-500 hover:text-blue-400 transition-colors animate-float" style={{ animationDelay: '1s' }} />
-                <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-slate-500 to-transparent" />
-              </div>
+              <p className="mt-8 text-center text-[9px] font-bold text-slate-600 uppercase tracking-widest relative z-10">
+                Protected by Novalytix SecLayer v4.0
+              </p>
             </div>
           </motion.div>
         ) : (
@@ -273,160 +234,123 @@ export default function UnifiedAdminPage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="min-h-screen bg-slate-50 text-slate-800 flex"
           >
-            {/* Dark Premium Sidebar - Compacted & Fixed */}
-            <aside className="w-64 bg-[#020617] border-r border-white/5 flex flex-col h-screen sticky top-0 z-20 shadow-[10px_0_40px_-10px_rgba(0,0,0,0.3)] shrink-0">
-              {/* Subtle mesh background for sidebar */}
+            {/* Sidebar with Toggle Effect */}
+            <motion.aside 
+              initial={false}
+              animate={{ 
+                width: isSidebarOpen ? 256 : 80,
+                x: 0
+              }}
+              className="bg-[#020617] border-r border-white/5 flex flex-col h-screen sticky top-0 z-20 shadow-[10px_0_40px_-10px_rgba(0,0,0,0.3)] shrink-0 overflow-hidden"
+            >
               <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
               
-              <div className="p-6 flex items-center gap-3 relative z-10 shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#00b4d8] to-[#0077b6] rounded-xl flex items-center justify-center text-white shadow-[0_0_15px_rgba(0,180,216,0.25)]">
-                  <Shield className="w-5 h-5" />
+              <div className={`p-6 flex items-center relative z-10 shrink-0 mb-4 ${isSidebarOpen ? 'gap-3' : 'justify-center ml-[-4px]'}`}>
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-[0_0_15px_rgba(255,255,255,0.1)] shrink-0 overflow-hidden">
+                  <Image 
+                    src="/logi-Photoroom.png" 
+                    alt="NTS Logo" 
+                    width={40} 
+                    height={40} 
+                    className="object-contain"
+                  />
                 </div>
-                <div>
-                  <h1 className="text-lg font-black text-white tracking-tight uppercase italic">Admin<span className="text-[#00b4d8]">Hub</span></h1>
-                  <p className="text-[8px] font-black tracking-[0.25em] uppercase text-slate-500 mt-1 pb-0">Gateway 01</p>
-                </div>
+                {isSidebarOpen && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="overflow-hidden whitespace-nowrap"
+                  >
+                    <h1 className="text-lg font-black text-white tracking-tight uppercase italic">Admin<span className="text-[#00b4d8]">Hub</span></h1>
+                    <p className="text-[8px] font-black tracking-[0.25em] uppercase text-slate-500 mt-1 pb-0">Gateway 01</p>
+                  </motion.div>
+                )}
               </div>
               
-              {/* Main Navigation - Adjusted Spacing */}
-              <nav className="flex-1 px-3 pt-6 pb-6 flex flex-col gap-2 relative z-10 overflow-y-auto custom-scrollbar">
-                <button 
-                  onClick={() => setActiveTab('dashboard')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'dashboard' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'dashboard' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <LayoutDashboard className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'dashboard' ? 'text-[#00b4d8]' : ''}`} />
-                  Dashboard
-                </button>
-                <button 
-                  onClick={() => setActiveTab('inquiries')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'inquiries' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'inquiries' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <MessageSquare className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'inquiries' ? 'text-[#00b4d8]' : ''}`} />
-                  Inquiries
-                </button>
-                <button 
-                  onClick={() => setActiveTab('careers')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'careers' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'careers' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <Briefcase className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'careers' ? 'text-[#00b4d8]' : ''}`} />
-                  Applications
-                </button>
-                <button 
-                  onClick={() => setActiveTab('blogs')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'blogs' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'blogs' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <FileText className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'blogs' ? 'text-[#00b4d8]' : ''}`} />
-                  Blogs
-                </button>
-                <button 
-                  onClick={() => setActiveTab('opportunities')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'opportunities' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'opportunities' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <Target className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'opportunities' ? 'text-[#00b4d8]' : ''}`} />
-                  Opportunities
-                </button>
-                <button 
-                  onClick={() => setActiveTab('employees')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'employees' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'employees' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <Users className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'employees' ? 'text-[#00b4d8]' : ''}`} />
-                  Employees
-                </button>
-                <button 
-                  onClick={() => setActiveTab('slips')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'slips' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'slips' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <Receipt className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'slips' ? 'text-[#00b4d8]' : ''}`} />
-                  Salary Slips
-                </button>
-                <button 
-                  onClick={() => setActiveTab('experience')}
-                  className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'experience' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
-                >
-                  {activeTab === 'experience' && (
-                    <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
-                  )}
-                  <Award className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${activeTab === 'experience' ? 'text-[#00b4d8]' : ''}`} />
-                  Experience Letter
-                </button>
+              <nav className="flex-1 px-3 flex flex-col gap-2 relative z-10 overflow-y-auto custom-scrollbar no-scrollbar">
+                {navItems.map((item) => (
+                  <button 
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`group relative flex items-center rounded-xl text-sm font-bold transition-all duration-300 ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-4 justify-center'} ${activeTab === item.id ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,180,216,0.1)] border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
+                    title={!isSidebarOpen ? item.label : ''}
+                  >
+                    {activeTab === item.id && (
+                      <motion.div layoutId="nav-indicator" className="absolute left-0 w-1 h-5 bg-[#00b4d8] rounded-full shadow-[0_0_10px_rgba(0,180,216,0.5)]" />
+                    )}
+                    <item.icon className={`w-4 h-4 transform group-hover:scale-110 transition-transform shrink-0 ${activeTab === item.id ? 'text-[#00b4d8]' : ''}`} />
+                    {isSidebarOpen && <span>{item.label}</span>}
+                  </button>
+                ))}
               </nav>
 
-              <div className="p-4 relative z-10">
-                <div className="bg-white/5 rounded-xl p-4 mb-3 border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+              <div className="p-4 relative z-10 border-t border-white/5">
+                <div className={`bg-white/5 rounded-xl p-3 mb-3 border border-white/10 overflow-hidden ${!isSidebarOpen && 'flex justify-center'}`}>
+                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3' : ''}`}>
+                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
                       <User className="w-4 h-4 text-slate-400" />
                     </div>
-                    <div>
-                      <p className="text-[8px] font-black uppercase tracking-widest text-[#00b4d8]">Verified</p>
-                      <p className="text-xs font-bold text-white">{formData.username || 'Admin'}</p>
-                    </div>
+                    {isSidebarOpen && (
+                      <div className="overflow-hidden whitespace-nowrap">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-[#00b4d8]">Verified</p>
+                        <p className="text-xs font-bold text-white truncate w-full">{formData.username || 'Admin'}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <button 
                   onClick={handleLogout}
-                  className="flex w-full items-center justify-center gap-2 px-3 py-3 bg-transparent hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg text-xs font-bold transition-all border border-transparent hover:border-rose-500/20"
+                  className={`flex items-center justify-center bg-transparent hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg text-xs font-bold transition-all border border-transparent hover:border-rose-500/20 w-full ${isSidebarOpen ? 'px-3 py-3 gap-2' : 'p-3'}`}
                 >
                   <LogOut className="w-4 h-4" />
-                  Terminate Session
+                  {isSidebarOpen && 'Terminate Session'}
                 </button>
               </div>
-            </aside>
+            </motion.aside>
 
-            {/* Main Content Area */}
             <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-              {/* Subtle background gradient pattern */}
               <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
                 <div className="absolute top-0 right-[-10%] w-[50%] h-[50%] bg-blue-100 rounded-full blur-[120px]"></div>
                 <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-cyan-50 rounded-full blur-[120px]"></div>
               </div>
 
               <header className="bg-white/60 backdrop-blur-xl border-b border-white px-8 py-6 flex items-center justify-between relative z-10 shrink-0 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
-                <div>
-                  <h2 className="text-2xl font-black text-[#0a1128] tracking-tight">
-                    {activeTab === 'dashboard' && 'Command Center'}
-                    {activeTab === 'inquiries' && 'Contact Inquiries'}
-                    {activeTab === 'careers' && 'Job Applications'}
-                    {activeTab === 'blogs' && 'Blog Management'}
-                    {activeTab === 'opportunities' && 'Opportunities Pipeline'}
-                  </h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] inline-block"></span>
-                    System Operational 
-                  </p>
+                <div className="flex items-center gap-6">
+                  <button 
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className="w-10 h-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#00b4d8] hover:border-[#00b4d8] transition-all"
+                  >
+                    {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                  </button>
+                  <div>
+                    <h2 className="text-2xl font-black text-[#0a1128] tracking-tight">
+                      {activeTab === 'dashboard' && 'Command Center'}
+                      {activeTab === 'inquiries' && 'Contact Inquiries'}
+                      {activeTab === 'careers' && 'Job Applications'}
+                      {activeTab === 'blogs' && 'Blog Management'}
+                      {activeTab === 'opportunities' && 'Opportunities Pipeline'}
+                      {activeTab === 'employees' && 'Employees Registry'}
+                      {activeTab === 'slips' && 'Payroll Hub'}
+                      {activeTab === 'experience' && 'Credentials Engine'}
+                      {activeTab === 'internship' && 'Offer Generation'}
+                    </h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] inline-block"></span>
+                       System Operational 
+                    </p>
+                  </div>
                 </div>
                 <div className="flex bg-white shadow-sm border border-slate-100 p-1.5 rounded-xl items-center gap-2">
                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                      <Clock className="w-4 h-4" />
                    </div>
-                   <div className="pr-3 text-[10px] font-bold text-slate-600">
+                   <div className="pr-3 text-[10px] font-bold text-slate-600 whitespace-nowrap">
                      {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                    </div>
                 </div>
               </header>
 
-              <main className="flex-1 overflow-y-auto px-8 pb-12 pt-8 relative z-10">
+              <main className="flex-1 overflow-y-auto px-8 pb-12 pt-8 relative z-10 custom-scrollbar">
                 {activeTab === 'dashboard' && (
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -434,15 +358,12 @@ export default function UnifiedAdminPage() {
                     className="max-w-5xl mx-auto flex flex-col pt-8 pb-12"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                      {/* ── Financial Summary Banner ── */}
                       <div className="col-span-1 md:col-span-2 relative bg-[#0a1128] rounded-[2rem] overflow-hidden p-8 shadow-2xl shadow-slate-900/20">
                         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAtNnY2aDZ2LTZoLTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
                         <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-full blur-[60px]"></div>
                         <div className="relative z-10">
                           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-6">Business Intelligence Overview</p>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            {/* Total Salary Paid */}
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
                               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Salary Paid</p>
                               <p className="text-2xl font-black text-white">
@@ -450,7 +371,6 @@ export default function UnifiedAdminPage() {
                               </p>
                               <p className="text-[10px] text-slate-500 mt-1">{counts.slips} slip{counts.slips !== 1 ? 's' : ''} generated</p>
                             </div>
-                            {/* Total Project Valuation */}
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
                               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Project Valuation</p>
                               <p className="text-2xl font-black text-cyan-400">
@@ -458,7 +378,6 @@ export default function UnifiedAdminPage() {
                               </p>
                               <p className="text-[10px] text-slate-500 mt-1">{counts.opportunities} deal{counts.opportunities !== 1 ? 's' : ''} in pipeline</p>
                             </div>
-                            {/* Projects Done */}
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
                               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Projects Completed</p>
                               <p className="text-2xl font-black text-emerald-400">
@@ -471,160 +390,45 @@ export default function UnifiedAdminPage() {
                       </div>
                       <button 
                         onClick={() => setActiveTab('inquiries')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-900/10"
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-[#0a1128]/20 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-900/10"
                       >
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
                         <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Contact Inquiries</h3>
                         <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Manage contact form submissions.</p>
-                        
                         <div className="flex items-center gap-3 mb-6 relative z-10">
                           <div className="px-3 py-1.5 bg-blue-50 text-[#00b4d8] rounded-full text-[10px] font-black italic">
                             {counts.inquiries} Total
                           </div>
                         </div>
-                        
                         <div className="inline-flex items-center gap-2 text-[#00b4d8] font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
                           Open <ArrowRight className="w-3.5 h-3.5" />
                         </div>
                       </button>
 
-                      {/* Careers Card */}
                       <button 
                         onClick={() => setActiveTab('careers')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-emerald-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-900/10"
+                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-emerald-900/5 border border-[#0a1128]/20 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-900/10"
                       >
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
                         <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Job Applications</h3>
                         <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Review candidate applications.</p>
-                        
                         <div className="flex items-center gap-3 mb-6 relative z-10">
                           <div className="px-3 py-1.5 bg-emerald-50 text-emerald-500 rounded-full text-[10px] font-black italic">
                             {counts.careers} Applicants
                           </div>
                         </div>
-                        
                         <div className="inline-flex items-center gap-2 text-emerald-500 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
                           Open <ArrowRight className="w-3.5 h-3.5" />
                         </div>
                       </button>
-
-                      {/* Opportunities Card */}
-                      <button 
-                        onClick={() => setActiveTab('opportunities')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-amber-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-amber-900/10 col-span-1 md:col-span-2"
-                      >
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
-                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Sales Pipeline</h3>
-                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[400px]">Track and manage prospective clients, values, and deal statuses seamlessly aligned with incoming leads.</p>
-                        
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                          <div className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black italic">
-                            {counts.opportunities} Deals
-                          </div>
-                        </div>
-                        
-                        <div className="inline-flex items-center gap-2 text-amber-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
-                          Manage Deals <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
-
-                      {/* Blogs Card */}
-                      <button 
-                        onClick={() => setActiveTab('blogs')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-cyan-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/10"
-                      >
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
-                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Blog Management</h3>
-                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Publish news and insights.</p>
-                        
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                          <div className="px-3 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-[10px] font-black italic">
-                            {counts.blogs} Articles
-                          </div>
-                        </div>
-                        
-                        <div className="inline-flex items-center gap-2 text-cyan-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
-                          Open <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
-
-                      {/* Employees Card */}
-                      <button 
-                        onClick={() => setActiveTab('employees')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-indigo-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-900/10"
-                      >
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
-                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Personnel Directory</h3>
-                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Manage corporate staff records.</p>
-                        
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                          <div className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black italic">
-                            {counts.employees} Registered
-                          </div>
-                        </div>
-                        
-                        <div className="inline-flex items-center gap-2 text-indigo-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
-                          Open <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
-
-                      {/* Salary Slips Card */}
-                      <button 
-                        onClick={() => setActiveTab('slips')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-teal-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-900/10 col-span-1 md:col-span-2"
-                      >
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
-                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Payroll & Slips</h3>
-                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[400px]">Generate legally verifiable monthly salary PDFs and automatically track the firm's payroll history in the database.</p>
-                        
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                          <div className="px-3 py-1.5 bg-teal-50 text-teal-600 rounded-full text-[10px] font-black italic">
-                            {counts.slips} Slips Generated
-                          </div>
-                        </div>
-                        
-                        <div className="inline-flex items-center gap-2 text-teal-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
-                          Manage Payroll <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
-
-                      {/* Experience Letter Card */}
-                      <button 
-                        onClick={() => setActiveTab('experience')}
-                        className="group relative bg-white p-6 rounded-[2rem] shadow-xl shadow-violet-900/5 border border-slate-100 overflow-hidden text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-900/10"
-                      >
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-violet-50 to-purple-50 rounded-full blur-[40px] group-hover:scale-110 transition-transform duration-700"></div>
-                        
-                        <h3 className="text-xl font-black text-[#0a1128] mb-2 relative z-10">Credentials & Letters</h3>
-                        <p className="text-xs text-slate-500 font-medium relative z-10 mb-4 leading-relaxed max-w-[200px]">Issue formal experience certificates.</p>
-                        
-                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                          <div className="px-3 py-1.5 bg-violet-50 text-violet-600 rounded-full text-[10px] font-black italic">
-                            Official Document
-                          </div>
-                        </div>
-                        
-                        <div className="inline-flex items-center gap-2 text-violet-600 font-black uppercase tracking-widest text-[10px] relative z-10 group-hover:gap-3 transition-all">
-                          Generate <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
                     </div>
 
-                    {/* Analytics Section */}
                     <AdminCharts 
                       opportunities={opportunities} 
                       slips={slips} 
                       counts={counts} 
                     />
 
-
-                    {/* Recent Activity Section */}
                     <div className="mt-16 space-y-6">
                       <div className="flex items-center justify-between">
                         <h4 className="text-xl font-black text-[#0a1128] tracking-tight uppercase italic flex items-center gap-3">
@@ -633,7 +437,7 @@ export default function UnifiedAdminPage() {
                         </h4>
                       </div>
                       
-                      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 divide-y divide-slate-50">
+                      <div className="bg-white rounded-[2.5rem] border border-[#0a1128]/20 shadow-xl shadow-slate-200/40 divide-y divide-slate-50">
                         {recentActivity.map((activity, idx) => (
                           <div key={idx} className="p-8 flex items-center justify-between hover:bg-slate-50/50 transition-colors group">
                             <div className="flex items-center gap-6">
@@ -674,11 +478,6 @@ export default function UnifiedAdminPage() {
                             </div>
                           </div>
                         ))}
-                        {recentActivity.length === 0 && (
-                          <div className="p-16 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
-                            Secure line established. Awaiting data packets...
-                          </div>
-                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -690,6 +489,7 @@ export default function UnifiedAdminPage() {
                 {activeTab === 'employees' && <EmployeesTable />}
                 {activeTab === 'slips' && <SalarySlipGenerator />}
                 {activeTab === 'experience' && <ExperienceLetter />}
+                {activeTab === 'internship' && <InternshipOfferLetter />}
                 {activeTab === 'blogs' && (
                   <div className="space-y-12 pb-20 pt-8">
                     <BlogForm onSuccess={() => setRefreshBlogs(prev => prev + 1)} />

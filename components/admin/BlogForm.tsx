@@ -56,7 +56,7 @@ export default function BlogForm({ onSuccess }: { onSuccess: () => void }) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden p-6 md:p-8 mb-8"
+      className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/50 border border-[#0a1128]/20 overflow-hidden p-6 md:p-8 mb-8"
     >
       <div className="mb-6">
         <h3 className="text-xl font-black text-[#0a1128] tracking-tight">Create Blog</h3>
